@@ -1,0 +1,138 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsrefs}
+\usepackage{mathtools}
+\usepackage{dsfont}
+\usepackage{fullpage}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{enumerate}
+\usepackage{mathrsfs}
+\usepackage{stmaryrd}
+\usepackage{listings}
+\usepackage[all]{xy}
+\usepackage[mathcal]{eucal}
+\usepackage{verbatim}  %%includes comment environment
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\R}{\mathbb R}
+\newcommand{\nc}{\newcommand}
+\nc{\M}{\mathrm{M}}
+\nc{\spec}{\mathrm{Spec}}
+\nc{\Hom}{\mathrm{Hom}}
+\nc{\rad}{\mathrm{rad}}
+\nc{\up}{\upsilon}
+\nc{\units}{^{\times}}
+\nc{\inv}{^{-1}}
+\nc{\ba}{\overline{A}}
+\nc{\bb}{\overline{B}}
+\nc{\bc}{\overline{C}}
+\nc{\sm}{\sum_{n=0}^\infty}
+\nc{\smn}{\sum_{n\geq N}^\infty}
+\nc{\smm}{\sum_{n\geq M}^\infty}
+\nc{\vphi}{\varphi}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}{Lemma}[theorem]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{definition}{Definition}
+\allowdisplaybreaks
+
+%absolute value function
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\DeclarePairedDelimiter\norm{\|}{\|}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\title{CSCI 6907: Project \#1}
+
+\author{Samuel Dooley}
+
+\date{February 15, 2016}
+
+
+
+
+\begin{document}
+\maketitle
+
+\noindent Our goal is to answer the following questions about the Astronomy co-authorship dataset:
+\begin{enumerate}
+	\item Who is the \emph{central person(s)} in the graph?
+	\item What is the \emph{longest path} in the graph?
+	\item What is the \emph{largest clique} in the graph?
+	\item Given a particular node/person, what is its/his/hers \emph{ego}? 
+	\item Given a particular node/person, what is its/his/hers \emph{power centrality}
+\end{enumerate}
+
+\color{ForestGreen}
+\noindent \textbf{Note}: For 4 and 5, I'm not exactly sure if these are the questions he is asking. He just writes the words `ego' and `power-centrality' which are properties of a node. 
+Thus, I imagined that he intended for us to implement functions that would calculate this for a given node. What did you think about this?
+\\
+
+\color{Black}
+In the process of answering these five questions, we have played with the following functions:
+
+\begin{enumerate}
+
+	\item \texttt{degree(graph, v = V(graph), mode = c("all", "out", "in", "total"),
+  				      loops = TRUE, normalized = FALSE)}
+	
+		This is a function that takes a graph as input and outputs an array of all the graph's vertices with each one's corresponding degree. The degree of a vertices is its number of `neighbors,' i.e., how many places can one go from a given node while traversing this graph. For example:
+\begin{lstlisting}[language=R]
+> degree(astrocollab)
+  BIERMANN, PL   STANEV, TKGT     GOLDMAN, I      WANDEL, A 
+            36              1              5              4 
+  ....
+		\end{lstlisting}
+		This array is ordered as the array of vertices is ordered. This BIERMANN, PL appears first in both this array and the array of vertices (this can be tested by \texttt{V(astrocollab)[1]}). To get the answer for the person with largest degree, or the central person, we can perform 
+\begin{lstlisting}[language=R]
+> sort( degree(astrocollab), decreasing = TRUE)[1]
+		\end{lstlisting}
+
+
+	\item woierhs
+	\item \texttt{largest\_cliques(graph, ...)}
+\end{enumerate}
+
+
+
+\textbf{Answers}
+\begin{enumerate}
+	\item ``FRONTERA, F''
+\end{enumerate}
+
+
+
+\textbf{Code}
+\begin{lstlisting}[language = R]
+# Central person:
+# input: graph
+# output: array of strings with 
+#         names of nodes with the most neighbors
+central_person <- function(graph) {
+  
+  d <-sort( degree(astrocollab), decreasing = TRUE)
+  
+  # Get the people with the most
+  m <- max(d)
+  n <- names(which( m == d ))
+  return(n)
+}
+\end{lstlisting}
+
+\end{document}
