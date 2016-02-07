@@ -79,13 +79,8 @@
 	\item Given a particular node/person, what is its/his/hers \emph{power centrality}
 \end{enumerate}
 
-\color{ForestGreen}
-\noindent \textbf{Note}: For 4 and 5, I'm not exactly sure if these are the questions he is asking. He just writes the words `ego' and `power-centrality' which are properties of a node. 
-Thus, I imagined that he intended for us to implement functions that would calculate this for a given node. What did you think about this?
-\\
 
-\color{Black}
-In the process of answering these five questions, we have played with the following functions:
+\noindent In the process of answering these five questions, we have played with the following functions:
 
 \begin{enumerate}
 
@@ -105,8 +100,38 @@ In the process of answering these five questions, we have played with the follow
 		\end{lstlisting}
 
 
-	\item woierhs
-	\item \texttt{largest\_cliques(graph, ...)}
+	\item \texttt{betweenness(graph,, ..)}\\
+	This function was used to compute the power-centrality of a given person. Depending upon the reference that is used, power-centrality is equivalent to the betweenness-centrality of a given node. The betweenness centrality of a node is calculated as 
+	$$ \sum_{x \neq y \neq z} \frac{\sigma_{xz}(y)}{\sigma_{xz}} $$
+	where $x,y,z\in V$, $\sigma_{xz}$ is defined to be the total number of shortest paths from $x$ to $z$ and $\sigma_{xz}(y)$ is the total number of those that pass through node $y$. 
+	
+	This problem is incredibly hard to compute, and so we use the simplified version of the graph.
+	 
+	\item \texttt{betweenness.estimate(graph, cutoff, ...)}\\
+	Since the above function is too computationally intensive for the entire graph, we can take this function to estimate the betweenness-centrality. This is done with a slight modification that cuts off the distance between nodes $x$ and $z$ in the above formula. This makes the calculation as follows:
+		$$ \sum_{\substack{x \neq y \neq z \\ p(x,z) \leq 10}} \frac{\sigma_{xz}(y)}{\sigma_{xz}} $$
+	where $x,y,z\in V$, $p(x,z)$ is the shortest path length from $x$ to $z$, $\sigma_{xz}$ is defined to be the total number of shortest paths from $x$ to $z$ and $\sigma_{xz}(y)$ is the total number of those that pass through node $y$. 
+
+	
+	\item \texttt{largest\_cliques(graph, ...)}\\
+	This function computes the largest fully connected subgraph of \texttt{graph}. This can be done with simple matrix manipulation and linear algebra, so it is rather efficient. Thus we do not need to use the simplified version, and the original astronomy collaboration graph of full vertices. 
+		
+	\item \texttt{ego(graph, order, ...)}\\
+	This function will take the \texttt{graph} and will compute, for each vertex, $v$, of \texttt{graph}, the subgraph which has all vertices in \texttt{graph} that are of \texttt{order} distance away from $v$. This can be done easily for small order, but it harder when the order gets larger. So when \texttt{order} is greater than about 7 for this graph, it is best to use the simplified graph for this. 
+	
+	\item \texttt{diameter(graph, ...)}\\
+	This function computes the longest geodesic path in \texttt{graph}. A geodesic path is one such that there are no repeating vertices in the path which eliminates all problems of the path containing cycles. 
+	
+	In general, this problem is NP-hard which at the very least shows that there is not a known polynomial-time algorithm for this problem, even if P=NP. So in order for this calculation to be done efficiently, we use the simplified subgraph for this problem.
+	
+	\item \texttt{shortest.paths(graph, from, ...)}\\
+	This function takes the \texttt{graph} and computes the shortest path from the vertex \texttt{from} to all the other vertices in the graph. The returned value will the the vertices traversed on that particular path from \texttt{from} to the other vertex. 
+	
+	One can also specify a \texttt{to} vertex and the function will return the list of vertices traversed from \texttt{from} to \texttt{to}.
+	
+	\item \texttt{clusters(graph, ..)}\\
+	This function will take \texttt{graph} and determine what the connected components are. If the graph is connected, then \texttt{clusters} will return one subgraph. If it is not connected, then the function will return an array of the connected components. This is thus useful for simplifying the graph. For this particular graph (astronomy collaborators), we can use the function \texttt{cluster.distribution} to determine that the majority of the clusters are of size $<<$ the maximum size of clusters.
+	
 \end{enumerate}
 
 
@@ -114,25 +139,65 @@ In the process of answering these five questions, we have played with the follow
 \textbf{Answers}
 \begin{enumerate}
 	\item ``FRONTERA, F''
+	
+	\item If we run this on the entire graph, we get an answer of\\
+	\indent \quad 17.482562
+	
+	\item This can be computed easily with the function
+	\begin{lstlisting}[language =R]
+> largest.cliques(astrocollab)
+	\end{lstlisting}
 \end{enumerate}
 
 
 
 \textbf{Code}
 \begin{lstlisting}[language = R]
+astrocollab <- upgrade_graph(astrocollab)
+
+
 # Central person:
 # input: graph
 # output: array of strings with 
 #         names of nodes with the most neighbors
 central_person <- function(graph) {
   
-  d <-sort( degree(astrocollab), decreasing = TRUE)
+  d <-sort( degree(graph), decreasing = TRUE)
   
   # Get the people with the most
   m <- max(d)
   n <- names(which( m == d ))
   return(n)
 }
+
+# Simplify the graph
+# First easy thing to be done would be to remove all the
+# nodes that are isolates
+remove_isolates <- function(graph) {
+  
+  d <- degree(graph)
+  
+  # find those that have zero neighbors
+  new <- delete.vertices( graph, which( d == 0 ) )
+  return( new )
+}
+
+# Can simplify the graph more
+# We notice that there are 369 connectected components
+# with the largest connected component comprising of 88%
+# of the graph. Let's only analyze that part
+largest_connected <- function(graph) {
+  
+  cls <- clusters(new)
+  # what is the index of the largest connected component?
+  i <- which.max(cls$csize)
+  largest_cc <- which(clusters(new)$membership != i)
+  
+  new <- delete.vertices(graph, largest_cc)
+  return(new)
+}
+
+simple <- largest_connected( remove_isolates( astrocollab ) )
 \end{lstlisting}
 
 \end{document}
