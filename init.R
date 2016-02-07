@@ -2,7 +2,7 @@
 
 install.packages("igraph")
 require("igraph")
-load("~/Documents/GWU/16Spring/CSCI6907/Project1/astrocollab.Rdata")
+load("astrocollab.Rdata")
 
 
 astrocollab <- upgrade_graph(astrocollab)
